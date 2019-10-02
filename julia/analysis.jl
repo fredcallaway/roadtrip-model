@@ -108,4 +108,43 @@ fits = map(eachindex(data)) do i
      vs_radn = -res.minimum - sum(rand_logp.(trials[:, i])))
 end |> DataFrame
 
+
+# %% ====================  ====================
+
+function logp(value::Function, t::Trial, α::Float64)
+    mapreduce(+, eachindex(t.bs)) do i
+        q = value(t.m, t.bs[i])
+        log(softmax(α .* q)[t.cs[i]+1])
+    end
+end
+
+function fit_softmax(value, trials)
+    res = optimize(1e-10, 10) do α
+        -sum(logp.(value, trials, α))
+    end
+    (α=res.minimizer, logp=-res.minimum)
+end
+
+function fit_participants(value)
+    map(eachindex(data)) do i
+        fit_softmax(value, trials[:, i])
+    end
+end
+
+@time greedy_fits = fit_participants(voc1) |> DataFrame
+
+
+
+fits = map(eachindex(data)) do i
+    res = optimize(1e-10, 10) do α
+        -sum(logp.(value, trials[:, i], α))
+    end
+    (α = res.minimizer,
+     like = -res.minimum,
+     vs_radn = -res.minimum - sum(rand_logp.(trials[:, i])))
+end |> DataFrame
+
+logp.(voc1, trials[:, 1], 1.)
+# %% ====================  ====================
+
 println(fits)
