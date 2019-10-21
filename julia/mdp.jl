@@ -140,17 +140,6 @@ function observe!(m::MetaMDP, b::Belief, c::Int)
     b[c] = rand(m.reward_dist)
 end
 
-function voc1(m::MetaMDP, b::Belief, c::Int)
-    c == TERM && return 0
-    q = mapreduce(+, results(m, b, c)) do (p, b1, r)
-        p * (term_reward(m, b1) + r)
-    end
-    q - term_reward(m, b)
-end
-
-voc1(m, b) = [voc1(m, b, c) for c in 0:length(b)]
-
-
 # %% ==================== Solution ====================
 
 struct ValueFunction{F}

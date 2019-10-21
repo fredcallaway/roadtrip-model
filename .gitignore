@@ -1,2 +1,4 @@
 identifiers.csv
 data/human_raw
+julia/results
+julia/scratch.jl
